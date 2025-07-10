@@ -7,7 +7,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
-DATASET_PATH = "/data/professors_dataset.jsonl"
+DATASET_PATH = "professors_dataset.jsonl"
 
 def get_teacher_tags(soup):
     tags_container = None

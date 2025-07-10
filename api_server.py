@@ -6,7 +6,7 @@ import threading
 
 app = FastAPI()
 
-DATASET_PATH = "/data/professors_dataset.jsonl"
+DATASET_PATH = "professors_dataset.jsonl"
 
 process_lock = threading.Lock()
 build_process = None
@@ -72,4 +72,4 @@ def peek_file():
 
 @app.get("/ls")
 def list_files():
-    return {"files": os.listdir("/data")}
+    return {"files": os.listdir(".")}
