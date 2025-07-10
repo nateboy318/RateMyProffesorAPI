@@ -73,3 +73,9 @@ def peek_file():
 @app.get("/ls")
 def list_files():
     return {"files": os.listdir(".")}
+
+@app.get("/touch")
+def touch():
+    with open(DATASET_PATH, "w") as f:
+        f.write("hello\n")
+    return {"status": "created"}

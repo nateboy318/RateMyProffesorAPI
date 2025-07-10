@@ -108,6 +108,7 @@ def fetch_professor_data(professor_id, max_retries=3, retry_delay=2):
         try:
             response = requests.get(url, headers=headers, timeout=10)
             if response.status_code != 200:
+                print(f"Professor {professor_id}: status code {response.status_code}, returning None")
                 return None
             soup = BeautifulSoup(response.text, "html.parser")
             tags = get_teacher_tags(soup)
@@ -131,8 +132,9 @@ def fetch_professor_data(professor_id, max_retries=3, retry_delay=2):
                 "ratings": all_ratings
             }
             if name_title or teacher_department:
-                print(f"Fetched professor {professor_id}")
+                print(f"Returning from fetch_professor_data: {professor_data}")
                 return professor_data
+            print(f"Returning from fetch_professor_data: None (no name_title or teacher_department)")
             return None
         except Exception as e:
             print(f"Error for professor {professor_id} (attempt {attempt}): {e}")
@@ -140,6 +142,7 @@ def fetch_professor_data(professor_id, max_retries=3, retry_delay=2):
                 time.sleep(retry_delay)
             else:
                 print(f"Giving up on professor {professor_id} after {max_retries} attempts.")
+    print(f"Returning from fetch_professor_data: None (exception or retries exceeded)")
     return None
 
 def save_professor_jsonl(professor_data, filename=DATASET_PATH, lock=None):
@@ -189,5 +192,9 @@ if __name__ == "__main__":
         futures = {executor.submit(fetch_professor_data, pid): pid for pid in range(start_id, end_id)}
         for future in as_completed(futures):
             result = future.result()
+            print(f"Result from future: {result}")
             if result:
-                save_professor_jsonl(result, filename, lock=dataset_lock) 
+                print(f"Calling save_professor_jsonl for professor {result.get('professor_id')}")
+                save_professor_jsonl(result, filename, lock=dataset_lock)
+            else:
+                print("Result is None, skipping save_professor_jsonl.") 
