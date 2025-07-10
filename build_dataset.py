@@ -7,6 +7,8 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
+DATASET_PATH = "/data/professors_dataset.jsonl"
+
 def get_teacher_tags(soup):
     tags_container = None
     for tag in soup.find_all(True, class_=True):
@@ -140,15 +142,19 @@ def fetch_professor_data(professor_id, max_retries=3, retry_delay=2):
                 print(f"Giving up on professor {professor_id} after {max_retries} attempts.")
     return None
 
-def save_professor_jsonl(professor_data, filename="professors_dataset.jsonl", lock=None):
+def save_professor_jsonl(professor_data, filename=DATASET_PATH, lock=None):
     line = json.dumps(professor_data, ensure_ascii=False) + "\n"
-    if lock:
-        with lock:
+    try:
+        print(f"Saving professor {professor_data.get('professor_id')} to {filename}")
+        if lock:
+            with lock:
+                with open(filename, "a", encoding="utf-8") as f:
+                    f.write(line)
+        else:
             with open(filename, "a", encoding="utf-8") as f:
                 f.write(line)
-    else:
-        with open(filename, "a", encoding="utf-8") as f:
-            f.write(line)
+    except Exception as e:
+        print(f"Error writing to {filename}: {e}")
 
 def get_last_professor_id(filename):
     last_id = 0
@@ -165,11 +171,11 @@ def get_last_professor_id(filename):
     return last_id
 
 if __name__ == "__main__":
-    filename = "professors_dataset.jsonl"
+    filename = DATASET_PATH
     dataset_lock = threading.Lock()
     max_workers = 500  # Number of threads
     start_id = 1
-    end_id = 3110807
+    end_id = 100000000
     # Resume logic
     if os.path.exists(filename):
         print(f"Resuming from existing file: {filename}")

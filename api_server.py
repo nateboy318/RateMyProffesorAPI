@@ -6,7 +6,7 @@ import threading
 
 app = FastAPI()
 
-DATASET_PATH = "professors_dataset.jsonl"
+DATASET_PATH = "/data/professors_dataset.jsonl"
 
 process_lock = threading.Lock()
 build_process = None
@@ -55,16 +55,21 @@ def build_status():
     global build_process
     with process_lock:
         running = build_process is not None and build_process.poll() is None
-        return {"running": running} 
+        return {"running": running}
 
 @app.get("/peek")
 def peek_file():
-    if not os.path.exists("professors_dataset.jsonl"):
+    if not os.path.exists(DATASET_PATH):
         return {"error": "file not found"}
-    with open("professors_dataset.jsonl") as f:
-        lines = [next(f) for _ in range(5)]
-    return {"lines": lines} 
+    lines = []
+    with open(DATASET_PATH, "r", encoding="utf-8") as f:
+        for _ in range(5):
+            try:
+                lines.append(next(f).strip())
+            except StopIteration:
+                break
+    return {"lines": lines}
 
 @app.get("/ls")
 def list_files():
-    return {"files": os.listdir(".")}
+    return {"files": os.listdir("/data")}
