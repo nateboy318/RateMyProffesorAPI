@@ -11,6 +11,10 @@ DATASET_PATH = "professors_dataset.jsonl"
 process_lock = threading.Lock()
 build_process = None
 
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
 @app.get("/count", response_class=PlainTextResponse)
 def get_count():
     if not os.path.exists(DATASET_PATH):
@@ -47,6 +51,7 @@ def pause_build():
 
 @app.get("/status")
 def build_status():
+    print("Status endpoint called")
     global build_process
     with process_lock:
         running = build_process is not None and build_process.poll() is None
