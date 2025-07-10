@@ -56,3 +56,15 @@ def build_status():
     with process_lock:
         running = build_process is not None and build_process.poll() is None
         return {"running": running} 
+
+@app.get("/peek")
+def peek_file():
+    if not os.path.exists("professors_dataset.jsonl"):
+        return {"error": "file not found"}
+    with open("professors_dataset.jsonl") as f:
+        lines = [next(f) for _ in range(5)]
+    return {"lines": lines} 
+
+@app.get("/ls")
+def list_files():
+    return {"files": os.listdir(".")}
